@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/logo.png" width="140" alt="Lektri.co Charger Card" />
+  <img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/logo.png" width="140" alt="Lektri.co Charger Card" />
 </p>
 
 # Lektri.co Charger Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/default)
-[![GitHub Release](https://img.shields.io/github/release/naked-head/lektrico-charger-card.svg)](https://github.com/naked-head/lektrico-charger-card/releases)
-[![Validate](https://github.com/naked-head/lektrico-charger-card/actions/workflows/validate.yml/badge.svg)](https://github.com/naked-head/lektrico-charger-card/actions/workflows/validate.yml)
-[![License](https://img.shields.io/github/license/naked-head/lektrico-charger-card.svg)](https://github.com/naked-head/lektrico-charger-card/blob/main/LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/giorgioparri/lektrico-charger-card.svg)](https://github.com/giorgioparri/lektrico-charger-card/releases)
+[![Validate](https://github.com/giorgioparri/lektrico-charger-card/actions/workflows/validate.yml/badge.svg)](https://github.com/giorgioparri/lektrico-charger-card/actions/workflows/validate.yml)
+[![License](https://img.shields.io/github/license/giorgioparri/lektrico-charger-card.svg)](https://github.com/giorgioparri/lektrico-charger-card/blob/main/LICENSE)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=naked-head&repository=lektrico-charger-card&category=plugin)
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=giorgioparri&repository=lektrico-charger-card&category=plugin)
 
 A Home Assistant Lovelace card built specifically for **Lektri.co EV
 chargers** — 1P7K / One (single-phase, 7.4 kW) and 3P22K / Tri
@@ -31,7 +31,7 @@ hardware in mind.
   maximum), a single blinking white bar while paused, red on error, red
   pulsing when locked, yellow during a firmware update. Colors and
   animations are overridable per state — see
-  [DOCS.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md#led-states) for the full mapping (including two
+  [DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md#led-states) for the full mapping (including two
   device LED states that have no matching integration state, so the card
   can't display them).
 - 🔌 **Three-phase & energy meter aware** — 3P22K/Tri chargers show the
@@ -60,13 +60,13 @@ hardware in mind.
 - ⚡ **Charging modes** — your own automations (solar charging, zero cost,
   fixed levels…) as chips, graphically distinct from the auto-discovered
   device actions (reboot, load balancing, …); the active mode is shown
-  under the status automatically. See [DOCS.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md) for ready-made
+  under the status automatically. See [DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md) for ready-made
   automations.
 - 🖱️ **GUI editor** — the main options are configurable from the dashboard
   UI; advanced options remain available in YAML.
 - 🌍 **Localized** — English, Italian, German, French, Dutch, Swedish, Danish,
   Norwegian, Romanian and Spanish out of the box
-  ([add a language](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md#adding-a-language)), every text overridable.
+  ([add a language](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md#adding-a-language)), every text overridable.
 - 🌗 Light & dark theme aware; works in narrow dashboard columns thanks to
   CSS container queries; a **compact view** for tight dashboards and an
   **ultra-compact view** (`compact: ultra`) for fully informative one-liners.
@@ -75,19 +75,19 @@ hardware in mind.
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/error.png" width="320" alt="Error"><br>Error state</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/error.png" width="320" alt="Error"><br>Error state</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/compact.png" width="320" alt="Compact"><br>Compact</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/compact.png" width="320" alt="Compact"><br>Compact</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/naked-head/lektrico-charger-card/HEAD/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
+    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
   </tr>
 </table>
 
@@ -123,7 +123,7 @@ entity: sensor.1p7k_state
 When an action has an `entity`, that entity is also used as the default
 service target — no need to repeat it in `service_data`. More modes
 (Zero Cost and the shutdown variants, with the matching automations) are
-in [DOCS.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md).
+in [DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md).
 
 ```yaml
 type: custom:lektrico-charger-card
@@ -197,7 +197,7 @@ meter_entity: select.em_lb_mode
 
 The load-balancing chips only appear if the device behind `meter_entity`
 actually exposes the `lb_mode` select — see
-[DOCS.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md#three-phase--energy-meter-notes) for a note on
+[DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md#three-phase--energy-meter-notes) for a note on
 third-party meters.
 
 ### Substatus (active charging mode)
@@ -211,7 +211,7 @@ in order of precedence:
    whose state is `on` contributes its `text` (or its `substatus` string).
    This works out of the box when each mode automation *enables itself and
    disables the sibling modes* (see the
-   [mode selector](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md#the-mode-selector) automation), so exactly one
+   [mode selector](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md#the-mode-selector) automation), so exactly one
    is `on` at a time. Set `substatus: false` on an action to exclude it,
    or `substatus_from_actions: false` to disable the mechanism.
 
@@ -270,7 +270,7 @@ scoped to its own device, for the `lb_mode`, `breaker_current`,
 
 Ready-made automations for the charging modes (solar Green mode, Zero
 Cost, shutdown variants, fixed levels) and the mode-selector pattern are
-documented in **[DOCS.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md)**.
+documented in **[DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md)**.
 
 ## Development & testing
 
@@ -284,15 +284,15 @@ npm test        # jsdom smoke test
 open it with any static file server (`npx serve .`) to try states, LED
 animations and the responsive layout without a running HA. Translations
 live in `src/translations/` — see
-[DOCS.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/DOCS.md#adding-a-language) to add a language.
+[DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md#adding-a-language) to add a language.
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/CHANGELOG.md).
+See [CHANGELOG.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/CHANGELOG.md).
 
 ## License
 
-GPL-3.0-or-later — see [LICENSE](https://github.com/naked-head/lektrico-charger-card/blob/HEAD/LICENSE)
+GPL-3.0-or-later — see [LICENSE](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/LICENSE)
 
 ## Disclaimer
 

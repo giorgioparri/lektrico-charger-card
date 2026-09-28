@@ -1,6 +1,6 @@
 {
   "name": "lektrico-charger-card",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "description": "Home Assistant Lovelace card for Lektri.co EV chargers (1P7K / One / 3P22K / Tri)",
   "type": "module",
   "private": true,
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/naked-head/lektrico-charger-card"
+    "url": "https://github.com/giorgioparri/lektrico-charger-card"
   },
   "keywords": [
     "home-assistant",
