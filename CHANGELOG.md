@@ -4,7 +4,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-09-28
+
 ### Changed
+- The project moved to the GitHub username `giorgioparri` (previously `naked-head`): links and badges in the README and the repository URL in the card's own metadata are updated. Nothing to do — existing installations keep working and GitHub redirects the old repository URLs.
 - The release workflow now checks that README screenshots are pinned to the tag being released, so the README shown in HACS matches the installed version. The logo stays on `HEAD`.
 
 ### Fixed
@@ -70,8 +73,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 - Quick actions (max 4) are user-selectable via `quick_actions: [id, ...]`, picked from the built-ins (`start`/`stop`/`authentication`/`lock`), the auto-discovered device actions (excluding the one-off `schedule_override`/`reboot`/`meter_reboot`), and custom actions (referenced by an `id` you set, or `custom:<
-[1.5.3]: https://github.com/naked-head/lektrico-charger-card/compare/v1.5.2...v1.5.3
-[1.5.2]: https://github.com/naked-head/lektrico-charger-card/compare/v1.5.1...v1.5.2
+[1.5.3]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.5.1...v1.5.2
 [1.5.1]index>`). Unset, the previous default (start/stop/auth/lock) is unchanged.
 
 ### Changed
@@ -124,16 +127,17 @@ All notable changes to this project are documented in this file. The format is b
 ### Added
 - Initial release: responsive SVG charger with animated status LEDs (green idle, blue connected, white spinning while charging with speed following the current, red on error), overlap-free sliders + preset chips, entity auto-discovery via the entity registry, error banner from the diagnostic sensors, quick actions, custom action chips, en/it localization, jsdom smoke test and standalone demo page.
 
-[Unreleased]: https://github.com/naked-head/lektrico-charger-card/compare/v1.6.2...HEAD
-[1.6.2]: https://github.com/naked-head/lektrico-charger-card/compare/v1.6.1...v1.6.2
-[1.6.1]: https://github.com/naked-head/lektrico-charger-card/compare/v1.6.0...v1.6.1
-[1.6.0]: https://github.com/naked-head/lektrico-charger-card/compare/v1.5.3...v1.6.0
-[1.5.3]: https://github.com/naked-head/lektrico-charger-card/compare/v1.5.2...v1.5.3
-[1.5.2]: https://github.com/naked-head/lektrico-charger-card/compare/v1.5.1...v1.5.2
-[1.5.1]: https://github.com/naked-head/lektrico-charger-card/compare/v1.5.0...v1.5.1
-[1.5.0]: https://github.com/naked-head/lektrico-charger-card/compare/v1.4.0...v1.5.0
-[1.4.0]: https://github.com/naked-head/lektrico-charger-card/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/naked-head/lektrico-charger-card/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/naked-head/lektrico-charger-card/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/naked-head/lektrico-charger-card/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/naked-head/lektrico-charger-card/releases/tag/v1.0.0
+[Unreleased]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.3...HEAD
+[1.6.3]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.2...v1.6.3
+[1.6.2]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.1...v1.6.2
+[1.6.1]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.5.3...v1.6.0
+[1.5.3]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.5.2...v1.5.3
+[1.5.2]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.5.0...v1.5.1
+[1.5.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/giorgioparri/lektrico-charger-card/releases/tag/v1.0.0
