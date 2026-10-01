@@ -75,19 +75,19 @@ hardware in mind.
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/error.png" width="320" alt="Error"><br>Error state</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/error.png" width="320" alt="Error"><br>Error state</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/compact.png" width="320" alt="Compact"><br>Compact</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/compact.png" width="320" alt="Compact"><br>Compact</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/HEAD/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
+    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.6.3/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
   </tr>
 </table>
 
