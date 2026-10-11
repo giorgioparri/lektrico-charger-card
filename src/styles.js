@@ -501,6 +501,27 @@ export default css`
     color: var(--primary-text-color);
     white-space: nowrap;
   }
+  /* Previous session's value shown between sessions: marked by a small
+     history icon and slightly muted, so it never reads as a live figure. */
+  .stat.held .value,
+  .info-item.held .value,
+  .ultra-stat-item.held .v {
+    color: var(--secondary-text-color);
+  }
+  .ultra-stat-item .held-icon {
+    --mdc-icon-size: 13px;
+    vertical-align: -1px;
+    margin-inline-end: 2px;
+  }
+  .stat .held-icon {
+    --mdc-icon-size: 15px;
+    vertical-align: -1px;
+    margin-inline-end: 3px;
+  }
+  .held-icon {
+    color: var(--secondary-text-color);
+    opacity: 0.8;
+  }
   .stat .label {
     font-size: 11px;
     color: var(--secondary-text-color);

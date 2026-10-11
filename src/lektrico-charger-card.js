@@ -15,6 +15,8 @@ import {
   DEFAULT_CURRENT_PRESETS,
   DEFAULT_BRIGHTNESS_PRESETS,
   DEFAULT_LED_SPIN,
+  LAST_SESSION_ROLES,
+  DEFAULT_LAST_SESSION_DAYS,
 } from './const.js';
 
 const fireEvent = (node, type, detail = {}) => {
@@ -39,6 +41,7 @@ class LektricoChargerCard extends LitElement {
     this._pendingSlider = {};
     this._roles = null;
     this._rolesKey = null;
+    this._lastSession = null;
   }
 
   setConfig(config) {
@@ -52,6 +55,7 @@ class LektricoChargerCard extends LitElement {
     this._rolesKey = null;
     this._meterRoles = null;
     this._meterKey = null;
+    this._lastSession = null;
   }
 
   getCardSize() {
@@ -318,6 +322,159 @@ class LektricoChargerCard extends LitElement {
   }
 
   /* ------------------------------------------------------------------ */
+  /* last session                                                        */
+  /* ------------------------------------------------------------------ */
+
+  // The charger zeroes its session counters (energy, charging time) when
+  // the cable is unplugged, so between sessions the card would only show
+  // zeros. While that is the case, the values of the session that just
+  // ended are read back from the recorder and shown in their place, until
+  // the next charge starts and the live counters take over again.
+  //
+  // The recorder is the source rather than anything kept in the card:
+  // a value remembered in the browser would vanish on reload and differ
+  // between devices, while history is the same for every viewer.
+
+  _isZeroish(stateObj) {
+    if (!stateObj) return true;
+    const { state } = stateObj;
+    if (state === 'unavailable' || state === 'unknown' || state === '') {
+      return true;
+    }
+    const n = Number(state);
+    return !Number.isNaN(n) && n <= 0;
+  }
+
+  // True while the live counters carry nothing worth showing: no charge in
+  // progress and a zeroed session energy. Energy is the session marker for
+  // both roles, so the two figures always come from the same session.
+  _holdingLastSession() {
+    if (this._config.last_session === false) return false;
+    const stateObj = this._stateObj('state');
+    if (!stateObj || stateObj.state === 'charging') return false;
+    const energy = this._stateObj('session_energy');
+    return Boolean(energy) && this._isZeroish(energy);
+  }
+
+  // Re-queried only when the counter resets again (its last_changed
+  // moves), so a dashboard left open costs one history call per session.
+  _lastSessionKey() {
+    const energy = this._stateObj('session_energy');
+    return energy ? `${energy.entity_id}|${energy.last_changed || ''}` : null;
+  }
+
+  _maybeFetchLastSession() {
+    if (!this._holdingLastSession()) return;
+    if (typeof this.hass?.callWS !== 'function') return;
+    const key = this._lastSessionKey();
+    if (!key || this._lastSession?.key === key) return;
+    this._lastSession = { key, values: null, endedAt: null };
+    this._fetchLastSession(key);
+  }
+
+  async _fetchLastSession(key) {
+    const ids = {};
+    for (const role of LAST_SESSION_ROLES) {
+      const obj = this._stateObj(role);
+      if (obj) ids[role] = obj.entity_id;
+    }
+    const days = Number(this._config.last_session_days) > 0
+      ? Number(this._config.last_session_days)
+      : DEFAULT_LAST_SESSION_DAYS;
+    const end = new Date();
+    const start = new Date(end.getTime() - days * 86400000);
+    let result = { key, values: null, endedAt: null };
+    try {
+      const history = await this.hass.callWS({
+        type: 'history/history_during_period',
+        start_time: start.toISOString(),
+        end_time: end.toISOString(),
+        entity_ids: Object.values(ids),
+        minimal_response: true,
+        no_attributes: true,
+        significant_changes_only: false,
+      });
+      result = { key, ...LektricoChargerCard._lastSessionFrom(history, ids) };
+    } catch (_e) {
+      // No history (recorder excluded, insufficient rights, ...): fall
+      // back to the live zeros, exactly as before this feature existed.
+    }
+    // A newer reset may have started its own query in the meantime.
+    if (this._lastSession?.key !== key) return;
+    this._lastSession = result;
+    this.requestUpdate();
+  }
+
+  // Pure function over a compressed history response
+  // ({entity_id: [{s, lu}, ...]}, lu in epoch seconds): the last positive
+  // energy sample is the end of the previous session, and the sample after
+  // it is the reset. The charging time is taken from before that reset so
+  // both values belong to the same session.
+  static _lastSessionFrom(history, ids) {
+    const rows = (id) => (id && Array.isArray(history?.[id]) ? history[id] : []);
+    const positive = (r) => Number(r?.s) > 0;
+    const ts = (r) => Number(r?.lu ?? r?.lc);
+
+    const energyRows = rows(ids.session_energy);
+    let idx = -1;
+    for (let i = energyRows.length - 1; i >= 0; i -= 1) {
+      if (positive(energyRows[i])) {
+        idx = i;
+        break;
+      }
+    }
+    if (idx < 0) return { values: null, endedAt: null };
+
+    const reset = idx + 1 < energyRows.length ? ts(energyRows[idx + 1]) : Infinity;
+    const values = { session_energy: energyRows[idx].s };
+    const timeRows = rows(ids.charging_time).filter(
+      (r) => positive(r) && !(ts(r) >= reset)
+    );
+    if (timeRows.length) values.charging_time = timeRows[timeRows.length - 1].s;
+    return {
+      values,
+      endedAt: Number.isFinite(reset) ? reset * 1000 : null,
+    };
+  }
+
+  // Which hold role, if any, a stats/info item refers to — by role name or
+  // by the entity id discovery resolved it to.
+  _lastSessionRole(entity) {
+    if (LAST_SESSION_ROLES.includes(entity)) return entity;
+    const roles = this._discover();
+    return LAST_SESSION_ROLES.find((r) => roles[r] && roles[r] === entity) || null;
+  }
+
+  // The state object to display for an item: the live one, or a copy
+  // carrying the previous session's value while holding.
+  _displayObj(entity, stateObj) {
+    const role = this._lastSessionRole(entity);
+    if (!role || !this._holdingLastSession()) return { obj: stateObj, held: false };
+    const value = this._lastSession?.values?.[role];
+    if (value == null) return { obj: stateObj, held: false };
+    return { obj: { ...stateObj, state: String(value) }, held: true };
+  }
+
+  _lastSessionTitle() {
+    const label = this._t('last_session');
+    const endedAt = this._lastSession?.endedAt;
+    if (!endedAt) return label;
+    try {
+      const when = new Date(endedAt).toLocaleString(this.hass.language || undefined, {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      });
+      return `${label} · ${when}`;
+    } catch (_e) {
+      return label;
+    }
+  }
+
+  _heldIcon() {
+    return html`<ha-icon class="held-icon" icon="mdi:history"></ha-icon>`;
+  }
+
+  /* ------------------------------------------------------------------ */
   /* interactions                                                        */
   /* ------------------------------------------------------------------ */
 
@@ -399,6 +556,11 @@ class LektricoChargerCard extends LitElement {
   /* ------------------------------------------------------------------ */
   /* render                                                              */
   /* ------------------------------------------------------------------ */
+
+  updated(changed) {
+    super.updated?.(changed);
+    if (this.hass && this._config) this._maybeFetchLastSession();
+  }
 
   render() {
     if (!this.hass || !this._config) return nothing;
@@ -607,8 +769,9 @@ class LektricoChargerCard extends LitElement {
   }
 
   _renderUltraStat({ entity, decimals, label: labelOverride }) {
-    const stateObj = this._stateObj(entity);
-    if (!stateObj) return nothing;
+    const liveObj = this._stateObj(entity);
+    if (!liveObj) return nothing;
+    const { obj: stateObj, held } = this._displayObj(entity, liveObj);
     const label =
       labelOverride ||
       (LANGUAGES.en.ui[entity]
@@ -632,10 +795,11 @@ class LektricoChargerCard extends LitElement {
     }
     return html`
       <div
-        class="ultra-stat-item"
+        class=${classMap({ 'ultra-stat-item': true, held })}
+        title=${held ? this._lastSessionTitle() : nothing}
         @click=${() => this._moreInfo(stateObj.entity_id)}
       >
-        <div class="v">${value}</div>
+        <div class="v">${held ? this._heldIcon() : nothing}${value}</div>
         <div class="l">${label}</div>
       </div>
     `;
@@ -643,8 +807,9 @@ class LektricoChargerCard extends LitElement {
 
   _renderInfoItem(item) {
     const conf = typeof item === 'string' ? { entity: item } : item;
-    const stateObj = this._stateObj(conf.entity);
-    if (!stateObj) return nothing;
+    const liveObj = this._stateObj(conf.entity);
+    if (!liveObj) return nothing;
+    const { obj: stateObj, held } = this._displayObj(conf.entity, liveObj);
     const label =
       conf.label ||
       (LANGUAGES.en.ui[conf.entity]
@@ -668,10 +833,12 @@ class LektricoChargerCard extends LitElement {
     }
     return html`
       <div
-        class="info-item"
+        class=${classMap({ 'info-item': true, held })}
+        title=${held ? this._lastSessionTitle() : nothing}
         @click=${() => this._moreInfo(stateObj.entity_id)}
       >
         <div class="value">
+          ${held ? this._heldIcon() : nothing}
           ${conf.icon ? html`<ha-icon .icon=${conf.icon}></ha-icon>` : nothing}
           ${value}
         </div>
@@ -1381,8 +1548,9 @@ class LektricoChargerCard extends LitElement {
       <div class="stats">
         ${items.map((item) => {
           const conf = typeof item === 'string' ? { entity: item } : item;
-          const stateObj = this._stateObj(conf.entity);
-          if (!stateObj) return nothing;
+          const liveObj = this._stateObj(conf.entity);
+          if (!liveObj) return nothing;
+          const { obj: stateObj, held } = this._displayObj(conf.entity, liveObj);
           const label =
             conf.label ||
             (LANGUAGES.en.ui[conf.entity]
@@ -1390,10 +1558,13 @@ class LektricoChargerCard extends LitElement {
               : stateObj.attributes.friendly_name);
           return html`
             <div
-              class="stat"
+              class=${classMap({ stat: true, held })}
+              title=${held ? this._lastSessionTitle() : nothing}
               @click=${() => this._moreInfo(stateObj.entity_id)}
             >
-              <div class="value">${conf.value || this._fmt(stateObj)}</div>
+              <div class="value">
+                ${held ? this._heldIcon() : nothing}${conf.value || this._fmt(stateObj)}
+              </div>
               <div class="label">${label}</div>
             </div>
           `;

@@ -253,5 +253,13 @@ export const ERROR_KEYS = [
 // `led_spin: {slowest, fastest}`.
 export const DEFAULT_LED_SPIN = { slowest: 6.0, fastest: 2.0 };
 
+// Session counters the charger zeroes on unplug. Between sessions the card
+// shows the previous session's values for these roles, read back from the
+// recorder (see `last_session` / `last_session_days`).
+export const LAST_SESSION_ROLES = ['session_energy', 'charging_time'];
+// How far back the recorder is searched. Matches the recorder's default
+// purge_keep_days: older history is normally gone anyway.
+export const DEFAULT_LAST_SESSION_DAYS = 10;
+
 export const DEFAULT_CURRENT_PRESETS = [6, 10, 13, 16, 20, 25, 32];
 export const DEFAULT_BRIGHTNESS_PRESETS = [10, 25, 50, 75, 100];

@@ -47,6 +47,10 @@ hardware in mind.
   every other entity of the device is found automatically through the
   entity registry. Works with renamed and localized entity ids; everything
   can be overridden.
+- 🕘 **Last session kept** — the charger zeroes session energy and
+  charging time when the cable is unplugged; until the next charge starts,
+  the card shows the previous session's figures instead, read back from
+  the recorder and marked with a small history icon. Nothing to set up.
 - 🚨 **Error handling** — on error, a red banner lists the active
   diagnostic sensors (overheating, RCD, overcurrent, …) with friendly
   names, and the stats row switches to the error view.
@@ -239,6 +243,8 @@ in order of precedence:
 | `brightness_presets` | list | `[10,25,50,75,100]` | Preset chips for the LED brightness. |
 | `info_left` / `info_right` | list | current(s)+limit / voltage(s)+power | Items beside the image. Each item is a role name (`current`, `dynamic_limit`, `voltage`, `power`, `current_l1`/`l2`/`l3`, `voltage_l1`/`l2`/`l3`, …), an entity id, or `{entity, label, icon, decimals}`. `decimals` forces fixed decimals on numeric values. Three-phase chargers default to the three currents/voltages instead of the single ones. |
 | `info_items` | list | installation current, lifetime energy, limit reason, temperature (+ breaker current, meter power when a meter is attached) | Rows of the *Information* section (same item format). |
+| `last_session` | bool | `true` | Between sessions, show the previous session's energy and charging time (from the recorder) instead of the zeros the charger reports after unplugging. The live values take over as soon as charging starts. Set `false` to always show the live counters. |
+| `last_session_days` | number | `10` | How far back the recorder is searched for the previous session. The default matches the recorder's default `purge_keep_days`: a session older than your recorder keeps is no longer available and the card shows the live zeros. |
 | `stats` | list or object | energy, time, temperature | Bottom stats. Either a list, or `{default: [...], charging: [...], error: [...]}` per state. |
 | `actions` | list | — | Chips in the *Actions* section: `{id, text, icon, service, service_data, target, entity, confirm, substatus}`. `id` lets a `quick_actions` entry reference this action; `entity` highlights the chip when its state is `on` and doubles as the default service target; `confirm` asks before running; `substatus` customizes (string) or suppresses (`false`) the chip's contribution to the derived substatus. |
 | `show_device_actions` | bool | `true` | Hide the auto-discovered device chips (reboot, load balancing, single-phase toggle, …) from the Actions section, keeping only custom ones. |
