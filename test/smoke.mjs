@@ -374,4 +374,126 @@ await card8.updateComplete;
 const qa8 = [...card8.shadowRoot.querySelectorAll('.qa-button')];
 assert(qa8.length === 1 && qa8[0].textContent.includes('Green Mode'), 'quick_actions: custom action picked via custom:<index> fallback id');
 
+// ---------- last session held between sessions ----------
+// The charger zeroes energy and charging time on unplug; the card reads the
+// previous session back from the recorder until the next charge starts.
+const T0 = Date.UTC(2026, 9, 11, 7, 0, 0) / 1000;
+const history = {
+  'sensor.1p7k_energia': [
+    { s: '0', lu: T0 },               // window start: previous session already reset
+    { s: '1.2', lu: T0 + 600 },
+    { s: '6.85', lu: T0 + 7200 },     // last value of the session
+    { s: '0', lu: T0 + 7500 },        // unplugged -> reset
+  ],
+  'sensor.1p7k_charging_time': [
+    { s: '0', lu: T0 },
+    { s: '7100', lu: T0 + 7200 },
+    { s: '0', lu: T0 + 7500 },
+  ],
+};
+const wsCalls = [];
+const mkHassLS = (stateName, energy, time, extra = {}) => ({
+  ...hass,
+  states: {
+    ...states,
+    'sensor.1p7k_state': { ...states['sensor.1p7k_state'], state: stateName },
+    'sensor.1p7k_energia': { ...states['sensor.1p7k_energia'], state: energy, last_changed: extra.reset || 'r1' },
+    'sensor.1p7k_charging_time': { ...states['sensor.1p7k_charging_time'], state: time },
+    'binary_sensor.1p7k_overheating': { ...states['binary_sensor.1p7k_overheating'], state: 'off' },
+  },
+  callWS: async (msg) => { wsCalls.push(msg); return extra.history ?? history; },
+});
+const flush = async (c) => { for (let i = 0; i < 3; i += 1) { await new Promise((r) => setTimeout(r, 0)); await c.updateComplete; } };
+
+const cardLS = document.createElement('lektrico-charger-card');
+cardLS.setConfig({ entity: 'sensor.1p7k_state' });
+cardLS.hass = mkHassLS('available', '0', '0');
+document.body.appendChild(cardLS);
+await flush(cardLS);
+const statsLS = () => cardLS.shadowRoot.querySelector('.stats').textContent.replace(/\s+/g, ' ');
+assert(wsCalls.length === 1 && wsCalls[0].type === 'history/history_during_period', 'unplugged with zeroed counters -> one history query');
+assert(wsCalls[0].entity_ids.includes('sensor.1p7k_energia') && wsCalls[0].entity_ids.includes('sensor.1p7k_charging_time'), 'history query covers energy and charging time');
+assert(statsLS().includes('6.85 kWh'), 'unplugged: previous session energy held');
+assert(statsLS().includes('01:58:20'), 'unplugged: previous session charging time held');
+assert(cardLS.shadowRoot.querySelectorAll('.stat.held').length === 2, 'held stats are marked');
+assert(cardLS.shadowRoot.querySelector('.stat.held .held-icon'), 'held stats carry the history icon');
+assert((cardLS.shadowRoot.querySelector('.stat.held')?.getAttribute('title') || '').startsWith('Ultima sessione'), 'held stat tooltip says last session (localized)');
+assert(!cardLS.shadowRoot.querySelector('.stat:not(.held) .held-icon'), 'temperature is never held');
+
+// re-render with the same reset: no second query
+cardLS.hass = mkHassLS('available', '0', '0');
+await flush(cardLS);
+assert(wsCalls.length === 1, 'same reset -> history not queried again');
+
+// plugged in, not charging yet: still the previous session
+cardLS.hass = mkHassLS('connected', '0', '0');
+await flush(cardLS);
+assert(statsLS().includes('6.85 kWh'), 'connected but not charging: previous session still shown');
+
+// charging starts: live counters take over, even at zero
+cardLS.hass = mkHassLS('charging', '0', '0');
+await flush(cardLS);
+assert(statsLS().includes('0 kWh') && !statsLS().includes('6.85'), 'charging: live counters take over immediately');
+assert(!cardLS.shadowRoot.querySelector('.stat.held'), 'charging: nothing marked as held');
+
+// a session in progress (paused at 0 A by a solar mode) keeps its live value
+cardLS.hass = mkHassLS('paused', '2.4', '1800');
+await flush(cardLS);
+assert(statsLS().includes('2.4 kWh') && !cardLS.shadowRoot.querySelector('.stat.held'), 'paused mid-session: live value, not held');
+
+// next unplug (new reset) -> new query
+cardLS.hass = mkHassLS('available', '0', '0', { reset: 'r2' });
+await flush(cardLS);
+assert(wsCalls.length === 2, 'new reset -> history queried again');
+
+// ultra-compact right column holds the energy too
+const cardLSu = document.createElement('lektrico-charger-card');
+cardLSu.setConfig({ entity: 'sensor.1p7k_state', compact: 'ultra' });
+cardLSu.hass = mkHassLS('available', '0', '0');
+document.body.appendChild(cardLSu);
+await flush(cardLSu);
+const heldInfo = cardLSu.shadowRoot.querySelector('.ultra-stat-item.held');
+assert(heldInfo && heldInfo.textContent.includes('6.85 kWh'), 'ultra-compact: held energy in the right column');
+
+// side info + stats referencing the entity id instead of the role name
+const cardLSi = document.createElement('lektrico-charger-card');
+cardLSi.setConfig({ entity: 'sensor.1p7k_state', info_right: ['sensor.1p7k_energia'], stats: ['sensor.1p7k_charging_time'] });
+cardLSi.hass = mkHassLS('available', '0', '0');
+document.body.appendChild(cardLSi);
+await flush(cardLSi);
+assert(cardLSi.shadowRoot.querySelector('.info-item.held')?.textContent.includes('6.85 kWh'), 'side info by entity id: held energy');
+assert(cardLSi.shadowRoot.querySelector('.stat.held')?.textContent.includes('01:58:20'), 'stats by entity id: held charging time');
+
+// opt-out
+const before = wsCalls.length;
+const cardLSoff = document.createElement('lektrico-charger-card');
+cardLSoff.setConfig({ entity: 'sensor.1p7k_state', last_session: false });
+cardLSoff.hass = mkHassLS('available', '0', '0');
+document.body.appendChild(cardLSoff);
+await flush(cardLSoff);
+assert(wsCalls.length === before, 'last_session: false -> no history query');
+assert(cardLSoff.shadowRoot.querySelector('.stats').textContent.includes('0 kWh'), 'last_session: false -> live zeros');
+
+// history failure falls back to live zeros
+const cardLSerr = document.createElement('lektrico-charger-card');
+cardLSerr.setConfig({ entity: 'sensor.1p7k_state' });
+cardLSerr.hass = { ...mkHassLS('available', '0', '0'), callWS: async () => { throw new Error('unauthorized'); } };
+document.body.appendChild(cardLSerr);
+await flush(cardLSerr);
+assert(cardLSerr.shadowRoot.querySelector('.stats').textContent.includes('0 kWh') && !cardLSerr.shadowRoot.querySelector('.stat.held'), 'history error -> live zeros, nothing held');
+
+// pure extraction: charging time comes from the same session as the energy
+const Card = customElements.get('lektrico-charger-card');
+const ids = { session_energy: 'e', charging_time: 't' };
+const r1 = Card._lastSessionFrom({
+  e: [{ s: '5', lu: 100 }, { s: '0', lu: 200 }],
+  t: [{ s: '900', lu: 150 }, { s: '0', lu: 200 }, { s: '60', lu: 300 }, { s: '0', lu: 400 }],
+}, ids);
+assert(r1.values.session_energy === '5' && r1.values.charging_time === '900', 'time sample after the reset (a later empty plug-in) is ignored');
+assert(r1.endedAt === 200000, 'end of session = reset instant');
+const r2 = Card._lastSessionFrom({ e: [{ s: '0', lu: 1 }], t: [] }, ids);
+assert(r2.values === null, 'no positive energy in window -> nothing held');
+const r3 = Card._lastSessionFrom({ e: [{ s: 'unavailable', lu: 1 }, { s: '3.1', lu: 2 }] }, ids);
+assert(r3.values.session_energy === '3.1' && r3.endedAt === null, 'session not reset yet in history -> value kept, no end time');
+
 console.log(process.exitCode ? '\nSMOKE TEST FAILED' : '\nSMOKE TEST PASSED');

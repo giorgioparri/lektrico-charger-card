@@ -21,6 +21,7 @@ const BOOL_DEFAULTS = {
   show_parameters: true,
   show_info: true,
   show_actions: true,
+  last_session: true,
 };
 
 const SCHEMA = [
@@ -53,6 +54,7 @@ const SCHEMA = [
       { name: 'show_parameters', selector: { boolean: {} } },
       { name: 'show_info', selector: { boolean: {} } },
       { name: 'show_actions', selector: { boolean: {} } },
+      { name: 'last_session', selector: { boolean: {} } },
     ],
   },
   {

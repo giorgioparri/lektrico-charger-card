@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-11
+
+### Added
+- Between sessions the card keeps showing the last charge. The charger zeroes session energy and charging time as soon as the cable is unplugged, so until now the card showed `0 kWh` and `00:00:00` until the next session. It now shows the previous session's figures, read back from Home Assistant's history and marked with a small history icon (the tooltip says when the session ended); the live values return as soon as charging starts. Nothing to configure — set `last_session: false` to keep the old behaviour, or `last_session_days` if your recorder keeps history for longer or shorter than the default 10 days. Sessions older than what your recorder keeps, or entities excluded from the recorder, simply show the live zeros as before.
+
 ## [1.6.3] - 2026-09-28
 
 ### Changed
@@ -127,7 +132,8 @@ All notable changes to this project are documented in this file. The format is b
 ### Added
 - Initial release: responsive SVG charger with animated status LEDs (green idle, blue connected, white spinning while charging with speed following the current, red on error), overlap-free sliders + preset chips, entity auto-discovery via the entity registry, error banner from the diagnostic sensors, quick actions, custom action chips, en/it localization, jsdom smoke test and standalone demo page.
 
-[Unreleased]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.3...HEAD
+[Unreleased]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.0...v1.6.1

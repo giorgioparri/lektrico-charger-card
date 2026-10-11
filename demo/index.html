@@ -169,6 +169,20 @@
       const u = st.attributes.unit_of_measurement;
       return u ? `${st.state} ${u}` : st.state;
     },
+    // Recorder history for the "last session" figures shown while unplugged:
+    // a 6.85 kWh session that ended two hours ago.
+    callWS: async (msg) => {
+      if (msg.type !== 'history/history_during_period') return {};
+      const now = Date.now() / 1000;
+      return {
+        'sensor.1p7k_energia': [
+          { s: '0', lu: now - 86400 }, { s: '6.85', lu: now - 7300 }, { s: '0', lu: now - 7200 },
+        ],
+        'sensor.1p7k_charging_time': [
+          { s: '0', lu: now - 86400 }, { s: '7100', lu: now - 7300 }, { s: '0', lu: now - 7200 },
+        ],
+      };
+    },
     callService: (domain, service, data) => {
       console.log('callService', domain, service, data);
       if (domain === 'number' && service === 'set_value') {
