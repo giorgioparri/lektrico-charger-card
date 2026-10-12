@@ -79,19 +79,19 @@ hardware in mind.
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/error.png" width="320" alt="Error"><br>Error state</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/error.png" width="320" alt="Error"><br>Error state</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/compact.png" width="320" alt="Compact"><br>Compact</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/compact.png" width="320" alt="Compact"><br>Compact</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.1/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
+    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0-beta.2/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
   </tr>
 </table>
 

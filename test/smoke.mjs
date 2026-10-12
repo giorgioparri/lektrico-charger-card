@@ -496,4 +496,38 @@ assert(r2.values === null, 'no positive energy in window -> nothing held');
 const r3 = Card._lastSessionFrom({ e: [{ s: 'unavailable', lu: 1 }, { s: '3.1', lu: 2 }] }, ids);
 assert(r3.values.session_energy === '3.1' && r3.endedAt === null, 'session not reset yet in history -> value kept, no end time');
 
+// ---------- editor: last-session panel ----------
+// The editor fires config-changed with the global Event constructor, which
+// in Node is not jsdom's: point it at jsdom's for these checks.
+globalThis.Event = window.Event;
+const ed = document.createElement('lektrico-charger-card-editor');
+ed.hass = { language: 'it' };
+ed.setConfig({ entity: 'sensor.1p7k_state' });
+document.body.appendChild(ed);
+await ed.updateComplete;
+const form = ed.shadowRoot.querySelector('ha-form');
+const schema = form.schema;
+const panel = schema.find((s) => s.type === 'expandable');
+const gridIdx = schema.findIndex((s) => s.type === 'grid');
+assert(panel && schema.indexOf(panel) === gridIdx + 1, 'editor: last-session panel right after the show_* grid');
+assert(panel.name === '' && panel.title === 'Ultima sessione', 'editor: panel flat (name "") with localized title');
+assert(!schema.find((s) => s.type === 'grid').schema.some((f) => f.name === 'last_session'), 'editor: toggle no longer in the show_* grid');
+assert(panel.schema.map((f) => f.name).join(',') === 'last_session,last_session_days', 'editor: panel holds toggle + days');
+assert(form.data.last_session_days === 10 && form.data.last_session === true, 'editor: defaults pre-filled (true, 10 days)');
+assert(form.computeHelper({ name: 'last_session_days' }).includes('purge_keep_days'), 'editor: days field has a helper text');
+
+const edEvents = [];
+ed.addEventListener('config-changed', (e) => edEvents.push(e.detail.config));
+const change = (value) => form.dispatchEvent(new window.CustomEvent('value-changed', { detail: { value } }));
+change({ ...form.data, last_session_days: 14 });
+assert(edEvents.at(-1).last_session_days === 14 && !('last_session' in edEvents.at(-1)), 'editor: 14 days saved, default toggle stripped');
+change({ ...form.data, last_session_days: 10 });
+assert(!('last_session_days' in edEvents.at(-1)), 'editor: default 10 days stripped from config');
+change({ ...form.data, last_session_days: '' });
+assert(!('last_session_days' in edEvents.at(-1)), 'editor: cleared days field removed, not saved empty');
+ed.setConfig({ entity: 'sensor.1p7k_state', last_session: false });
+await ed.updateComplete;
+const panelOff = ed.shadowRoot.querySelector('ha-form').schema.find((s) => s.type === 'expandable');
+assert(panelOff.schema.length === 1 && panelOff.schema[0].name === 'last_session', 'editor: days field hidden while the feature is off');
+
 console.log(process.exitCode ? '\nSMOKE TEST FAILED' : '\nSMOKE TEST PASSED');
