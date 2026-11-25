@@ -54,7 +54,7 @@ jobs:
             exit 1
           fi
           echo "package.json version $PKG_VERSION matches tag."
-      
+
       - name: Verify README image refs
         env:
           TAG: ${{ github.ref_name }}
@@ -216,7 +216,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.ref_name }}
           name: "Lektri.co Charger Card ${{ github.ref_name }}"
