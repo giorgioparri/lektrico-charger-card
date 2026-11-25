@@ -50,6 +50,13 @@ export const DEFAULT_LED_STATES = {
   unknown: { color: '#4caf50', animation: 'none' },
 };
 
+// With compatibility mode on (1P7K only), the real device keeps the cross
+// steady white while charging instead of spinning it. Applied on top of the
+// `charging` entry, so a custom charging colour carries over; overridable
+// on its own via `led_states.charging_compatibility`.
+export const COMPATIBILITY_LED_STATE = 'charging_compatibility';
+export const DEFAULT_COMPATIBILITY_LED = { animation: 'none' };
+
 // How card roles map onto the entities created by the `lektrico`
 // integration. Matching strategies, in order:
 //   1. explicit override from the `entities:` card option
@@ -188,6 +195,12 @@ export const ENTITY_ROLES = {
     domain: 'switch',
     keys: ['force_single_phase'],
     suffixes: ['_force_single_phase', '_forza_monofase'],
+  },
+  // Single-phase chargers only (1P7K / One), Home Assistant 2026.12+.
+  compatibility_mode: {
+    domain: 'switch',
+    keys: ['compatibility_mode'],
+    suffixes: ['_compatibility_mode'],
   },
   update: {
     domain: 'update',
