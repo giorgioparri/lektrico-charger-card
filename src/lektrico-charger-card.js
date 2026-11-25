@@ -9,6 +9,8 @@ import {
   CARD_VERSION,
   CARD_NAME,
   DEFAULT_LED_STATES,
+  COMPATIBILITY_LED_STATE,
+  DEFAULT_COMPATIBILITY_LED,
   ENTITY_ROLES,
   METER_ROLES,
   ERROR_KEYS,
@@ -849,10 +851,24 @@ class LektricoChargerCard extends LitElement {
 
   _ledConfig(state) {
     const custom = this._config.led_states || {};
-    return {
+    const led = {
       ...(DEFAULT_LED_STATES[state] || DEFAULT_LED_STATES.unknown),
       ...(custom[state] || {}),
     };
+    if (state === 'charging' && this._compatibilityOn()) {
+      return {
+        ...led,
+        ...DEFAULT_COMPATIBILITY_LED,
+        ...(custom[COMPATIBILITY_LED_STATE] || {}),
+      };
+    }
+    return led;
+  }
+
+  // Compatibility mode only exists on single-phase chargers with Home
+  // Assistant 2026.12+: a missing or unavailable switch counts as off.
+  _compatibilityOn() {
+    return this._stateObj('compatibility_mode')?.state === 'on';
   }
 
   _maxAmps() {
@@ -1103,6 +1119,28 @@ class LektricoChargerCard extends LitElement {
       });
     }
 
+    // Opt-in only: a per-car setting, not a charging command, so it is
+    // never among the defaults nor a device chip.
+    const compatibility = this._stateObj('compatibility_mode');
+    if (compatibility) {
+      candidates.push({
+        id: 'compatibility_mode',
+        render: () => html`
+          <button
+            class=${classMap({
+              'qa-button': true,
+              active: compatibility.state === 'on',
+            })}
+            @click=${() => this._toggleSwitch('compatibility_mode')}
+          >
+            <ha-icon icon="mdi:car-cog"></ha-icon>${this._t(
+              'compatibility_mode'
+            )}
+          </button>
+        `,
+      });
+    }
+
     for (const chip of this._deviceActions()) {
       if (
         LektricoChargerCard.QUICK_ACTION_EXCLUDED_DEVICE_IDS.includes(chip.id)
@@ -1304,6 +1342,7 @@ class LektricoChargerCard extends LitElement {
     const auth = this._stateObj('authentication');
     const lock = this._stateObj('lock');
     const forceSinglePhase = this._stateObj('force_single_phase');
+    const compatibility = this._stateObj('compatibility_mode');
     return html`
       ${this._renderSlider(
         'dynamic_limit',
@@ -1322,6 +1361,9 @@ class LektricoChargerCard extends LitElement {
         ${lock ? this._renderToggle('lock', lock, 'mdi:lock-outline') : nothing}
         ${forceSinglePhase
           ? this._renderToggle('force_single_phase', forceSinglePhase, 'mdi:sine-wave')
+          : nothing}
+        ${compatibility
+          ? this._renderToggle('compatibility_mode', compatibility, 'mdi:car-cog')
           : nothing}
       </div>
     `;

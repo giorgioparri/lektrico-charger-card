@@ -28,7 +28,8 @@ hardware in mind.
   connected and waiting for vehicle recognition, violet while waiting for
   remote-server authorization, white spinning while charging (the spin
   speed follows the actual current, normalized to the charger's real
-  maximum), a single blinking white bar while paused, red on error, red
+  maximum) or steady white when compatibility mode is on, a single
+  blinking white bar while paused, red on error, red
   pulsing when locked, yellow during a firmware update. Colors and
   animations are overridable per state — see
   [DOCS.md](https://github.com/giorgioparri/lektrico-charger-card/blob/HEAD/DOCS.md#led-states) for the full mapping (including two
@@ -39,6 +40,10 @@ hardware in mind.
   [integration's docs](https://www.home-assistant.io/integrations/lektrico/));
   attach a paired EM/3EM meter with `meter_entity` for load-balancing mode
   chips, breaker current and meter power.
+- 🚗 **Compatibility mode** — on 1P7K/One chargers, the compatibility mode
+  that was only in the Lektrico app gets its own toggle under Parameters
+  (Home Assistant 2026.12 or later). It shows up only where the
+  integration creates it.
 - 🎚️ **No overlapping dropdowns** — charging current and LED brightness are
   sliders with preset chips that wrap on small screens; every value is
   always reachable, and presets outside the charger's allowed range are
@@ -79,19 +84,19 @@ hardware in mind.
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/charging.png" width="320" alt="Charging"><br>Charging (dark)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/parameters.png" width="320" alt="Parameters"><br>Parameters</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/error.png" width="320" alt="Error"><br>Error state</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/error.png" width="320" alt="Error"><br>Error state</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/light.png" width="320" alt="Actions"><br>Actions (light)</td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/compact.png" width="320" alt="Compact"><br>Compact</td>
-    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/compact.png" width="320" alt="Compact"><br>Compact</td>
+    <td align="center"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/compact-actions.png" width="320" alt="Compact actions"><br>Compact — actions open</td>
   </tr>
   <tr>
-    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.7.0/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
+    <td align="center" colspan="2"><img src="https://raw.githubusercontent.com/giorgioparri/lektrico-charger-card/v1.8.0-beta.1/images/ultra-compact.png" width="320" alt="Ultra compact"><br>Ultra compact</td>
   </tr>
 </table>
 
@@ -173,7 +178,8 @@ interaction at all.
 
 The 4 quick-action buttons default to start/stop/authentication/lock, but
 can be replaced with `quick_actions`, a list of up to 4 ids picked from:
-the built-ins (`start`, `stop`, `authentication`, `lock`), the
+the built-ins (`start`, `stop`, `authentication`, `lock`,
+`compatibility_mode`), the
 auto-discovered device actions (e.g. `force_single_phase`,
 `lb_mode:power` — one-off actions like `reboot` are excluded), and your
 own custom actions (referenced by an `id` you set on them, or
@@ -198,6 +204,29 @@ entities to enable load-balancing chips, breaker current and meter power:
 ```yaml
 meter_entity: select.em_lb_mode
 ```
+
+### Compatibility mode
+
+Some cars draw an unsteady current from the charger during the session.
+Single-phase chargers (1P7K/One) have a compatibility mode for them,
+which until now could only be set from the Lektrico app. From Home
+Assistant 2026.12 the `lektrico` integration exposes it as a switch
+(`switch.<charger>_compatibility_mode`), and the card shows it as a
+toggle in the Parameters section, after the other switches. Changing it
+asks for no confirmation, like the other toggles.
+
+It is a per-car setting rather than a charging command, so it is not a
+device chip and not a default quick action; add `compatibility_mode` to
+`quick_actions` if you want it one tap away. The compact and ultra-compact
+views do not show the toggle.
+
+While the mode is on and the car is charging, the LEDs stay steady
+instead of spinning, as on the device. Override that look with
+`led_states.charging_compatibility`; a custom `charging` colour carries
+over.
+
+Three-phase chargers (3P22K/Tri) and Home Assistant releases before
+2026.12 have no such switch: nothing appears and nothing changes.
 
 The load-balancing chips only appear if the device behind `meter_entity`
 actually exposes the `lb_mode` select — see
@@ -235,7 +264,7 @@ in order of precedence:
 | `show_leds` | bool | `true` | Draw the LED cross. |
 | `image` | string | built-in SVG | Path/URL of a custom charger image (e.g. `/local/lektri.co.png`). The LED cross is overlaid on top (see `led_overlay_position`). |
 | `led_overlay_position` | object | centered | `{left, top, size}` CSS values for the LED overlay on a custom image, e.g. `{left: 28%, top: 25%, size: 44%}`. |
-| `led_states` | object | device-like | Override LED color/animation per state: `charging: {color: '#ffffff', animation: spin}`. Animations: `spin`, `pulse`, `top` (only the top bar lit, steady — the default for `paused`), `none`. |
+| `led_states` | object | device-like | Override LED color/animation per state: `charging: {color: '#ffffff', animation: spin}`. Animations: `spin`, `pulse`, `top` (only the top bar lit, steady — the default for `paused`), `none`. The extra key `charging_compatibility` sets the look while charging with compatibility mode on (default: the `charging` entry, not animated). |
 | `led_spin` | object | `{slowest: 6.0, fastest: 2.0}` | Rotation period (seconds) of the white charging animation: `slowest` at minimal current, `fastest` at the charger's maximum. The maximum is read from the dynamic-limit entity (6–32 A per phase on both the 7.4 kW and the 22 kW models), so it adapts to derated installations too. |
 | `state_text` | object | it/en defaults | Override the status text per state (`available`, `connected`, `need_auth`, `charging`, `paused`, `paused_by_scheduler`, `locked`, `error`, `updating_firmware`). |
 | `language` | string | HA language | Force a UI language. Built-in codes: `en`, `it`, `de`, `fr`, `nl`, `sv`, `da`, `nb`, `ro`, `es`. |
@@ -248,7 +277,7 @@ in order of precedence:
 | `stats` | list or object | energy, time, temperature | Bottom stats. Either a list, or `{default: [...], charging: [...], error: [...]}` per state. |
 | `actions` | list | — | Chips in the *Actions* section: `{id, text, icon, service, service_data, target, entity, confirm, substatus}`. `id` lets a `quick_actions` entry reference this action; `entity` highlights the chip when its state is `on` and doubles as the default service target; `confirm` asks before running; `substatus` customizes (string) or suppresses (`false`) the chip's contribution to the derived substatus. |
 | `show_device_actions` | bool | `true` | Hide the auto-discovered device chips (reboot, load balancing, single-phase toggle, …) from the Actions section, keeping only custom ones. |
-| `entities` | object | auto | Override auto-discovery per role: `entities: {power: sensor.my_power, dynamic_limit: number.my_limit, errors: [binary_sensor.a, …]}`. Roles: `state`, `charging_time`, `session_energy`, `lifetime_energy`, `power`, `voltage`, `current`, `voltage_l1`/`l2`/`l3`, `current_l1`/`l2`/`l3`, `installation_current`, `limit_reason`, `temperature`, `dynamic_limit`, `led_brightness`, `authentication`, `lock`, `charge_start`, `charge_stop`, `reboot`, `schedule_override`, `force_single_phase`, `update`, `errors`. |
+| `entities` | object | auto | Override auto-discovery per role: `entities: {power: sensor.my_power, dynamic_limit: number.my_limit, errors: [binary_sensor.a, …]}`. Roles: `state`, `charging_time`, `session_energy`, `lifetime_energy`, `power`, `voltage`, `current`, `voltage_l1`/`l2`/`l3`, `current_l1`/`l2`/`l3`, `installation_current`, `limit_reason`, `temperature`, `dynamic_limit`, `led_brightness`, `authentication`, `lock`, `charge_start`, `charge_stop`, `reboot`, `schedule_override`, `force_single_phase`, `compatibility_mode`, `update`, `errors`. |
 | `section_titles` | object | localized | Override the section tooltips/titles: `{parameters, info, actions}`. |
 
 ### How auto-discovery works

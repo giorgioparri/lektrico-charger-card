@@ -31,6 +31,7 @@ export default {
     voltage_l3: 'Tensiune L3',
     schedule_override: 'Ignorare programare',
     force_single_phase: 'Monofazat',
+    compatibility_mode: 'Mod compatibilitate',
     lb_mode: 'Echilibrare sarcină',
     breaker_current: 'Curent întrerupător',
     meter_power: 'Putere contor',

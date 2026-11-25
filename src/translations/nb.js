@@ -31,6 +31,7 @@ export default {
     voltage_l3: 'Spenning L3',
     schedule_override: 'Overstyr tidsplan',
     force_single_phase: 'Enfaset',
+    compatibility_mode: 'Kompatibilitetsmodus',
     lb_mode: 'Lastbalansering',
     breaker_current: 'Sikringsstrøm',
     meter_power: 'Målereffekt',

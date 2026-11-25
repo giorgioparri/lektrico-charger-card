@@ -31,6 +31,7 @@ export default {
     voltage_l3: 'Spannung L3',
     schedule_override: 'Zeitplan überschreiben',
     force_single_phase: 'Einphasig',
+    compatibility_mode: 'Kompatibilitätsmodus',
     lb_mode: 'Lastausgleich',
     breaker_current: 'Schutzschalter',
     meter_power: 'Zählerleistung',

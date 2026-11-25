@@ -31,6 +31,7 @@ export default {
     voltage_l3: 'Spanning L3',
     schedule_override: 'Schema overschrijven',
     force_single_phase: 'Eénfasig',
+    compatibility_mode: 'Compatibiliteitsmodus',
     lb_mode: 'Lastverdeling',
     breaker_current: 'Zekeringsstroom',
     meter_power: 'Metervermogen',

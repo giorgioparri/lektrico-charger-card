@@ -32,6 +32,7 @@ export default {
     voltage_l3: 'Voltage L3',
     schedule_override: 'Schedule override',
     force_single_phase: 'Single phase',
+    compatibility_mode: 'Compatibility mode',
     lb_mode: 'Load balancing',
     breaker_current: 'Breaker current',
     meter_power: 'Meter power',

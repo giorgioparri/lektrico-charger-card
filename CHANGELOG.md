@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-11-25
+
+### Added
+- Compatibility mode toggle for single-phase chargers (1P7K/One). The setting that was only in the Lektrico app is exposed by the Home Assistant `lektrico` integration from 2026.12 as `switch.<charger>_compatibility_mode`, and the card picks it up automatically: a toggle in the Parameters section, after the other switches, with no confirmation. Turn it on if your car's charging current fluctuates during the session. It is not a default quick action; add `compatibility_mode` to `quick_actions` if you want it one tap away. Three-phase chargers and Home Assistant releases before 2026.12 have no such switch, so nothing appears and nothing changes for them.
+- While compatibility mode is on and the car is charging, the LEDs stay steady white instead of spinning, as on the device — in the compact and ultra-compact views too. A custom `led_states.charging` colour carries over; the new `led_states.charging_compatibility` key overrides this look on its own.
+
 ## [1.7.0] - 2026-10-11
 
 ### Added
@@ -132,7 +138,8 @@ All notable changes to this project are documented in this file. The format is b
 ### Added
 - Initial release: responsive SVG charger with animated status LEDs (green idle, blue connected, white spinning while charging with speed following the current, red on error), overlap-free sliders + preset chips, entity auto-discovery via the entity registry, error banner from the diagnostic sensors, quick actions, custom action chips, en/it localization, jsdom smoke test and standalone demo page.
 
-[Unreleased]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.8.0...HEAD
+[1.8.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.3...v1.7.0
 [1.6.3]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/giorgioparri/lektrico-charger-card/compare/v1.6.1...v1.6.2

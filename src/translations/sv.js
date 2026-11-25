@@ -31,6 +31,7 @@ export default {
     voltage_l3: 'Spänning L3',
     schedule_override: 'Överskrid schema',
     force_single_phase: 'Enfasig',
+    compatibility_mode: 'Kompatibilitetsläge',
     lb_mode: 'Lastbalansering',
     breaker_current: 'Säkringsström',
     meter_power: 'Mätareffekt',

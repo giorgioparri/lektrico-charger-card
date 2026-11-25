@@ -496,6 +496,149 @@ assert(r2.values === null, 'no positive energy in window -> nothing held');
 const r3 = Card._lastSessionFrom({ e: [{ s: 'unavailable', lu: 1 }, { s: '3.1', lu: 2 }] }, ids);
 assert(r3.values.session_energy === '3.1' && r3.endedAt === null, 'session not reset yet in history -> value kept, no end time');
 
+// ---------- compatibility mode (1P7K only, Home Assistant 2026.12+) ----------
+// switch.<device>_compatibility_mode, translation_key `compatibility_mode`.
+// Absent on three-phase chargers and on Home Assistant before 2026.12.
+const cmFixture = (chargerState, compat, { registry = true, compatEid = 'switch.cm_compatibility_mode' } = {}) => {
+  const s = {
+    'sensor.cm_state': mk3('sensor.cm_state', chargerState, {}),
+    'sensor.cm_current': mk3('sensor.cm_current', '16', { device_class: 'current', unit_of_measurement: 'A' }),
+    'sensor.cm_session_energy': mk3('sensor.cm_session_energy', '2.0', { unit_of_measurement: 'kWh' }),
+    'number.cm_dynamic_limit': mk3('number.cm_dynamic_limit', '16', { min: 6, max: 32, step: 1, unit_of_measurement: 'A' }),
+    'switch.cm_lock': mk3('switch.cm_lock', 'off', {}),
+    'button.cm_charge_start': mk3('button.cm_charge_start', 'unknown', {}),
+    'button.cm_charge_stop': mk3('button.cm_charge_stop', 'unknown', {}),
+  };
+  const keys = {
+    'sensor.cm_state': 'state', 'sensor.cm_current': 'current', 'sensor.cm_session_energy': 'session_energy',
+    'number.cm_dynamic_limit': 'dynamic_limit', 'switch.cm_lock': 'lock',
+    'button.cm_charge_start': 'charge_start', 'button.cm_charge_stop': 'charge_stop',
+  };
+  if (compat !== undefined) {
+    s[compatEid] = mk3(compatEid, compat, {});
+    keys[compatEid] = 'compatibility_mode';
+  }
+  const reg = {};
+  if (registry) {
+    for (const [eid, key] of Object.entries(keys)) {
+      reg[eid] = { entity_id: eid, device_id: 'devCm', platform: 'lektrico', translation_key: key, entity_category: eid === compatEid ? 'config' : null };
+    }
+  }
+  const cmCalls = [];
+  const cmHass = {
+    language: 'en', states: s, entities: reg,
+    callService: (d, sv, data) => cmCalls.push([d, sv, data]),
+    formatEntityState: (st) => st.attributes.unit_of_measurement ? `${st.state} ${st.attributes.unit_of_measurement}` : st.state,
+  };
+  return { cmHass, cmCalls };
+};
+const cmCard = async (config, fixture) => {
+  const c = document.createElement('lektrico-charger-card');
+  c.setConfig({ entity: 'sensor.cm_state', ...config });
+  c.hass = fixture.cmHass;
+  document.body.appendChild(c);
+  await c.updateComplete;
+  return c;
+};
+const cmOpenSection = async (c, title) => {
+  const btn = [...c.shadowRoot.querySelectorAll('.section-toggle')].find((b) => b.title === title);
+  if (btn) { btn.click(); await c.updateComplete; }
+  return Boolean(btn);
+};
+const cmRow = (c) => [...c.shadowRoot.querySelectorAll('.toggle-row')].find((r) => r.textContent.includes('Compatibility mode'));
+
+// LEDs: steady white while charging in compatibility mode, spin otherwise
+let fx = cmFixture('charging', 'on');
+let cm = await cmCard({}, fx);
+let cmLeds = cm.shadowRoot.querySelector('.leds');
+assert(cmLeds?.classList.contains('anim-none') && /--led-color:\s*#ffffff/.test(cmLeds.getAttribute('style') || ''), 'compat on + charging -> steady white LED');
+assert(!cm.shadowRoot.querySelector('.leds.anim-spin'), 'compat on + charging -> no spin');
+
+fx = cmFixture('charging', 'off');
+cm = await cmCard({}, fx);
+assert(cm.shadowRoot.querySelector('.leds.anim-spin'), 'compat off + charging -> spin as before');
+
+fx = cmFixture('charging', 'unavailable');
+cm = await cmCard({}, fx);
+assert(cm.shadowRoot.querySelector('.leds.anim-spin'), 'compat unavailable + charging -> spin as before');
+
+fx = cmFixture('paused', 'on');
+cm = await cmCard({}, fx);
+assert(cm.shadowRoot.querySelector('.leds.anim-top'), 'compat on + paused -> top bar blinking, unchanged');
+
+fx = cmFixture('available', 'on');
+cm = await cmCard({}, fx);
+assert(cm.shadowRoot.querySelector('.leds.anim-pulse'), 'compat on + available -> green pulse, unchanged');
+
+// led_states: a custom charging colour carries over, the steady variant is overridable on its own
+fx = cmFixture('charging', 'on');
+cm = await cmCard({ led_states: { charging: { color: '#00bcd4' } } }, fx);
+cmLeds = cm.shadowRoot.querySelector('.leds');
+assert(cmLeds?.classList.contains('anim-none') && (cmLeds.getAttribute('style') || '').includes('#00bcd4'), 'compat: custom charging colour kept, still steady');
+cm = await cmCard({ led_states: { charging_compatibility: { color: '#ff9800', animation: 'pulse' } } }, fx);
+cmLeds = cm.shadowRoot.querySelector('.leds');
+assert(cmLeds?.classList.contains('anim-pulse') && (cmLeds.getAttribute('style') || '').includes('#ff9800'), 'compat: led_states.charging_compatibility overrides');
+
+// Parameters: toggle row next to lock, writes the switch, no confirmation
+fx = cmFixture('charging', 'off');
+cm = await cmCard({}, fx);
+await cmOpenSection(cm, 'Parameters');
+const row = cmRow(cm);
+assert(row, 'compat: toggle row in Parameters');
+assert(cm.shadowRoot.querySelectorAll('.toggle-row').length === 2, 'compat: two toggle rows (lock + compatibility)');
+const origConfirm = window.confirm;
+let confirmAsked = false;
+window.confirm = () => { confirmAsked = true; return true; };
+row?.querySelector('ha-switch')?.dispatchEvent(new window.Event('change'));
+window.confirm = origConfirm;
+assert(fx.cmCalls.some((c) => c[0] === 'switch' && c[1] === 'toggle' && c[2].entity_id === 'switch.cm_compatibility_mode'), 'compat: toggle row calls switch.toggle');
+assert(!confirmAsked, 'compat: no confirmation asked');
+
+// Not a device chip, not a default quick action
+await cmOpenSection(cm, 'Actions');
+assert(![...cm.shadowRoot.querySelectorAll('.action-chip')].some((c) => c.textContent.includes('Compatibility mode')), 'compat: no device chip in Actions');
+assert(![...cm.shadowRoot.querySelectorAll('.qa-button')].some((b) => b.textContent.includes('Compatibility mode')), 'compat: not among default quick actions');
+
+// Opt-in quick action
+fx = cmFixture('charging', 'on');
+cm = await cmCard({ quick_actions: ['start', 'compatibility_mode'] }, fx);
+const qaCompat = [...cm.shadowRoot.querySelectorAll('.qa-button')].find((b) => b.textContent.includes('Compatibility mode'));
+assert(qaCompat?.classList.contains('active'), 'compat: opt-in quick action, active while on');
+qaCompat?.click();
+assert(fx.cmCalls.some((c) => c[0] === 'switch' && c[1] === 'toggle' && c[2].entity_id === 'switch.cm_compatibility_mode'), 'compat: quick action toggles switch');
+
+// Missing entity (Home Assistant before 2026.12): no row, no error, LEDs as before
+fx = cmFixture('charging', undefined);
+cm = await cmCard({ quick_actions: ['start', 'compatibility_mode'] }, fx);
+await cmOpenSection(cm, 'Parameters');
+assert(!cmRow(cm) && cm.shadowRoot.querySelectorAll('.toggle-row').length === 1, 'compat missing: only the lock row');
+assert(cm.shadowRoot.querySelectorAll('.qa-button').length === 1, 'compat missing: requested quick action silently skipped');
+assert(cm.shadowRoot.querySelector('.leds.anim-spin'), 'compat missing: spin while charging');
+
+// Three-phase charger: never created by the integration
+await cmOpenSection(card3, 'Parameters');
+assert(!card3.shadowRoot.textContent.includes('Compatibility mode'), 'three-phase: no compatibility row');
+
+// Discovery without the entity registry (suffix) and through the `entities` override
+fx = cmFixture('charging', 'on', { registry: false });
+cm = await cmCard({}, fx);
+await cmOpenSection(cm, 'Parameters');
+assert(cmRow(cm), 'compat: found by entity_id suffix without registry');
+fx = cmFixture('charging', 'on', { registry: false, compatEid: 'switch.garage_ev_mode' });
+cm = await cmCard({ entities: { compatibility_mode: 'switch.garage_ev_mode' } }, fx);
+await cmOpenSection(cm, 'Parameters');
+assert(cmRow(cm), 'compat: found through entities override');
+
+// Compact and ultra: no control, LEDs still follow the mode
+fx = cmFixture('charging', 'on');
+cm = await cmCard({ compact: true }, fx);
+await cmOpenSection(cm, 'Actions');
+assert(!cm.shadowRoot.textContent.includes('Compatibility mode'), 'compact: no compatibility control');
+assert(cm.shadowRoot.querySelector('.leds.anim-none'), 'compact: steady LED while charging in compatibility mode');
+cm = await cmCard({ compact: 'ultra' }, fx);
+assert(!cm.shadowRoot.textContent.includes('Compatibility mode'), 'ultra: no compatibility control');
+assert(cm.shadowRoot.querySelector('.leds.anim-none'), 'ultra: steady LED while charging in compatibility mode');
+
 // ---------- editor: last-session panel ----------
 // The editor fires config-changed with the global Event constructor, which
 // in Node is not jsdom's: point it at jsdom's for these checks.

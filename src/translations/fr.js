@@ -31,6 +31,7 @@ export default {
     voltage_l3: 'Tension L3',
     schedule_override: 'Ignorer le planning',
     force_single_phase: 'Monophasé',
+    compatibility_mode: 'Mode compatibilité',
     lb_mode: 'Équilibrage de charge',
     breaker_current: 'Courant disjoncteur',
     meter_power: 'Puissance compteur',
