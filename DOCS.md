@@ -297,6 +297,7 @@ means just the top segment flashes, the rest stay dim.
 | Violet, steady | Connected, waiting for remote-server authorization | `need_auth` | ✅ |
 | Violet, pulsing | RFID tag learning mode | — | ❌ not implemented — no matching integration state |
 | White, rotating | Charging (speed follows the current) | `charging` | ✅ |
+| White, steady | Charging with compatibility mode on (1P7K/One) | `charging` + compatibility switch on | ✅ — override with `led_states.charging_compatibility` |
 | White, top bar only, blinking | Paused | `paused` / `paused_by_scheduler` | ✅ |
 | Red, steady | Generic error — contact support | `error` | ✅ |
 | Red, pulsing | Charger locked | `locked` | ✅ |
